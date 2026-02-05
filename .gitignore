@@ -1,0 +1,94 @@
+# =============================================================================
+# PSS Backend MT - Git Ignore
+# =============================================================================
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# IDE - Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Quarkus
+.quarkus/
+
+# Test Results
+test-output/
+surefire-reports/
+failsafe-reports/
+
+# Coverage Reports
+jacoco.exec
+*.exec
+coverage/
+htmlcov/
+
+# Environment files (IMPORTANTE: nao versionar segredos em producao)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Docker
+docker-compose.override.yml
+
+# =============================================================================
+# SECRETS - Diretorio para chaves e credenciais
+# =============================================================================
+# O diretorio secrets/ contem chaves JWT e credenciais de producao.
+# NUNCA versione estes arquivos - apenas os .example sao permitidos.
+secrets/*
+!secrets/.gitkeep
+!secrets/*.example
