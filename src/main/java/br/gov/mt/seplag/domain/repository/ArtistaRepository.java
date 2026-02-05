@@ -72,6 +72,15 @@ public class ArtistaRepository implements PanacheRepository<Artista> {
     }
 
     /**
+     * Busca artista por ID com albuns carregados.
+     * Fetch join pra evitar N+1 na hora de montar a resposta detalhada.
+     */
+    public Optional<Artista> findByIdWithAlbuns(Long id) {
+        return find("SELECT DISTINCT a FROM Artista a LEFT JOIN FETCH a.albuns WHERE a.id = ?1", id)
+            .firstResultOptional();
+    }
+
+    /**
      * Busca artistas por nome (exato).
      * Usado para validar duplicidade antes de inserir.
      */

@@ -6,6 +6,8 @@ import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Entidade que representa um artista (cantor ou banda).
@@ -32,6 +34,14 @@ public class Artista extends PanacheEntityBase {
 
     @Column(columnDefinition = "TEXT")
     private String descricao;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "artista_album",
+        joinColumns = @JoinColumn(name = "artista_id"),
+        inverseJoinColumns = @JoinColumn(name = "album_id")
+    )
+    private Set<Album> albuns = new HashSet<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -83,6 +93,14 @@ public class Artista extends PanacheEntityBase {
         this.descricao = descricao;
     }
 
+    public Set<Album> getAlbuns() {
+        return albuns;
+    }
+
+    public void setAlbuns(Set<Album> albuns) {
+        this.albuns = albuns;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -97,5 +115,16 @@ public class Artista extends PanacheEntityBase {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    // Metodos auxiliares para manter consistencia bidirecional
+    public void addAlbum(Album album) {
+        this.albuns.add(album);
+        album.getArtistas().add(this);
+    }
+
+    public void removeAlbum(Album album) {
+        this.albuns.remove(album);
+        album.getArtistas().remove(this);
     }
 }
