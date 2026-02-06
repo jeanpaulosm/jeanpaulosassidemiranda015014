@@ -119,6 +119,18 @@
             <artifactId>url-connection-client</artifactId>
         </dependency>
 
+        <!-- WebSocket -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-websockets</artifactId>
+        </dependency>
+
+        <!-- Scheduler (cleanup de tickets expirados) -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-scheduler</artifactId>
+        </dependency>
+
         <!-- CDI -->
         <dependency>
             <groupId>io.quarkus</groupId>
