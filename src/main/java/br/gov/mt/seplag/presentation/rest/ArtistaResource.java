@@ -7,6 +7,7 @@ import br.gov.mt.seplag.presentation.dto.artista.ArtistaRequest;
 import br.gov.mt.seplag.presentation.dto.artista.ArtistaResponse;
 import br.gov.mt.seplag.presentation.dto.common.ErrorResponse;
 import br.gov.mt.seplag.presentation.dto.common.PageResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -18,11 +19,12 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 /**
  * Resource REST para gerenciamento de artistas.
- * Endpoints ainda sem autenticacao - JWT sera adicionado em breve.
+ * Todos os endpoints requerem autenticacao JWT.
  *
  * @author Jean Paulo Sassi de Miranda
  */
@@ -30,12 +32,14 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Artistas", description = "Endpoints para gerenciamento de artistas")
+@SecurityRequirement(name = "Bearer Authentication")
 public class ArtistaResource {
 
     @Inject
     ArtistaService artistaService;
 
     @GET
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Lista artistas", description = "Retorna lista paginada de artistas com filtros e ordenacao")
     @APIResponses({
         @APIResponse(
@@ -74,6 +78,7 @@ public class ArtistaResource {
 
     @GET
     @Path("/{id}")
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Busca artista por ID", description = "Retorna detalhes do artista")
     @APIResponses({
         @APIResponse(
@@ -96,7 +101,8 @@ public class ArtistaResource {
     }
 
     @POST
-    @Operation(summary = "Cria artista", description = "Cria um novo artista no catalogo")
+    @RolesAllowed({"ADMIN"})
+    @Operation(summary = "Cria artista", description = "Cria um novo artista no catalogo. Requer role ADMIN.")
     @APIResponses({
         @APIResponse(
             responseCode = "201",
@@ -116,7 +122,8 @@ public class ArtistaResource {
 
     @PUT
     @Path("/{id}")
-    @Operation(summary = "Atualiza artista", description = "Atualiza um artista existente")
+    @RolesAllowed({"ADMIN"})
+    @Operation(summary = "Atualiza artista", description = "Atualiza um artista existente. Requer role ADMIN.")
     @APIResponses({
         @APIResponse(
             responseCode = "200",
@@ -145,7 +152,8 @@ public class ArtistaResource {
 
     @DELETE
     @Path("/{id}")
-    @Operation(summary = "Remove artista", description = "Remove um artista do catalogo")
+    @RolesAllowed({"ADMIN"})
+    @Operation(summary = "Remove artista", description = "Remove um artista do catalogo. Requer role ADMIN.")
     @APIResponses({
         @APIResponse(
             responseCode = "204",

@@ -6,6 +6,7 @@ import br.gov.mt.seplag.presentation.dto.album.AlbumRequest;
 import br.gov.mt.seplag.presentation.dto.album.AlbumResponse;
 import br.gov.mt.seplag.presentation.dto.common.ErrorResponse;
 import br.gov.mt.seplag.presentation.dto.common.PageResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -17,23 +18,26 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 /**
  * Resource REST para gerenciamento de albuns.
- * Segue o mesmo padrao do ArtistaResource.
+ * Todos os endpoints requerem autenticacao JWT.
  *
  * @author Jean Paulo Sassi de Miranda
  */
 @Path("/api/v1/albuns")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Albuns", description = "Endpoints para gerenciamento de albuns")
+@SecurityRequirement(name = "Bearer Authentication")
 public class AlbumResource {
 
     @Inject
     AlbumService albumService;
 
     @GET
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Lista albuns", description = "Retorna lista paginada de albuns com filtros e ordenacao")
     @APIResponses({
         @APIResponse(
@@ -75,6 +79,7 @@ public class AlbumResource {
 
     @GET
     @Path("/{id}")
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Busca album por ID", description = "Retorna detalhes do album incluindo artistas e imagens")
     @APIResponses({
         @APIResponse(
@@ -97,8 +102,9 @@ public class AlbumResource {
     }
 
     @POST
+    @RolesAllowed({"ADMIN"})
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Cria album", description = "Cria um novo album. Requer pelo menos um artista associado.")
+    @Operation(summary = "Cria album", description = "Cria um novo album. Requer pelo menos um artista associado. Requer role ADMIN.")
     @APIResponses({
         @APIResponse(
             responseCode = "201",
@@ -118,8 +124,9 @@ public class AlbumResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed({"ADMIN"})
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Atualiza album", description = "Atualiza um album existente")
+    @Operation(summary = "Atualiza album", description = "Atualiza um album existente. Requer role ADMIN.")
     @APIResponses({
         @APIResponse(
             responseCode = "200",
@@ -148,7 +155,8 @@ public class AlbumResource {
 
     @DELETE
     @Path("/{id}")
-    @Operation(summary = "Remove album", description = "Remove um album e seus relacionamentos")
+    @RolesAllowed({"ADMIN"})
+    @Operation(summary = "Remove album", description = "Remove um album e seus relacionamentos. Requer role ADMIN.")
     @APIResponses({
         @APIResponse(
             responseCode = "204",
