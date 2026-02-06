@@ -12,6 +12,7 @@ import br.gov.mt.seplag.presentation.dto.album.AlbumRequest;
 import br.gov.mt.seplag.presentation.dto.album.AlbumResponse;
 import br.gov.mt.seplag.presentation.dto.common.PageResponse;
 import br.gov.mt.seplag.infrastructure.storage.StorageService;
+import br.gov.mt.seplag.presentation.websocket.AlbumWebSocket;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -41,6 +42,9 @@ public class AlbumService {
 
     @Inject
     StorageService storageService;
+
+    @Inject
+    AlbumWebSocket albumWebSocket;
 
     /**
      * Lista albuns com filtros e paginacao.
@@ -107,7 +111,12 @@ public class AlbumService {
         albumRepository.persist(album);
 
         LOG.infof("Album criado com sucesso - ID: %d", album.getId());
-        return AlbumResponse.fromEntity(album);
+
+        // Notifica via WebSocket
+        AlbumResponse response = AlbumResponse.fromEntity(album);
+        albumWebSocket.notifyNewAlbum(response);
+
+        return response;
     }
 
     /**
