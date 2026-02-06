@@ -12,7 +12,7 @@ API REST para gerenciamento de artistas e albuns musicais, desenvolvida como pro
 | Campo | Valor |
 |-------|-------|
 | **Nome** | Jean Paulo Sassi de Miranda |
-| **CPF (6 digitos)** | 015014 |
+| **CPF** | 015.014.592-60 |
 | **Inscricao** | 16568 |
 | **Vaga** | Back-End Java Senior |
 | **Edital** | Processo Seletivo Simplificado no 001/2026/SEPLAG |
