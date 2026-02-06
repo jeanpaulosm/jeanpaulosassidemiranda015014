@@ -11,6 +11,7 @@ import br.gov.mt.seplag.presentation.dto.album.AlbumImagemResponse;
 import br.gov.mt.seplag.presentation.dto.album.AlbumRequest;
 import br.gov.mt.seplag.presentation.dto.album.AlbumResponse;
 import br.gov.mt.seplag.presentation.dto.common.PageResponse;
+import br.gov.mt.seplag.infrastructure.storage.StorageService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -38,6 +39,9 @@ public class AlbumService {
     @Inject
     ArtistaRepository artistaRepository;
 
+    @Inject
+    StorageService storageService;
+
     /**
      * Lista albuns com filtros e paginacao.
      */
@@ -54,7 +58,7 @@ public class AlbumService {
     }
 
     /**
-     * Busca album por ID com detalhes.
+     * Busca album por ID com detalhes e imagens.
      */
     public AlbumDetailResponse buscarPorId(Long id) {
         LOG.debugf("Buscando album por ID: %d", id);
@@ -62,15 +66,16 @@ public class AlbumService {
         Album album = albumRepository.findByIdWithDetails(id)
             .orElseThrow(() -> new ResourceNotFoundException("Album", id));
 
-        // Por enquanto monta a lista de imagens sem URL pre-assinada (MinIO vem depois)
-        List<AlbumImagemResponse> imagensResponse = new ArrayList<>();
+        // Gera URLs pre-assinadas para as imagens
+        List<AlbumImagemResponse> imagensComUrls = new ArrayList<>();
         if (album.getImagens() != null) {
             album.getImagens().forEach(imagem -> {
-                imagensResponse.add(AlbumImagemResponse.fromEntity(imagem, null));
+                String presignedUrl = storageService.getPresignedUrl(imagem.getObjectKey());
+                imagensComUrls.add(AlbumImagemResponse.fromEntity(imagem, presignedUrl));
             });
         }
 
-        return AlbumDetailResponse.fromEntity(album, imagensResponse);
+        return AlbumDetailResponse.fromEntity(album, imagensComUrls);
     }
 
     /**
@@ -152,6 +157,7 @@ public class AlbumService {
 
     /**
      * Remove um album pelo ID.
+     * Remove tambem as imagens associadas do MinIO e do banco.
      */
     @Transactional
     public void remover(Long id) {
@@ -160,7 +166,19 @@ public class AlbumService {
         Album album = albumRepository.findByIdWithDetails(id)
             .orElseThrow(() -> new ResourceNotFoundException("Album", id));
 
-        // Remove os vinculos com artistas antes de deletar
+        // Remove imagens do MinIO
+        if (album.getImagens() != null && !album.getImagens().isEmpty()) {
+            LOG.debugf("Removendo %d imagens do album ID: %d", album.getImagens().size(), id);
+            album.getImagens().forEach(imagem -> {
+                try {
+                    storageService.delete(imagem.getObjectKey());
+                } catch (Exception e) {
+                    LOG.warnf("Erro ao remover imagem %s do MinIO: %s", imagem.getObjectKey(), e.getMessage());
+                }
+            });
+        }
+
+        // Remove os vinculos com artistas
         if (album.getArtistas() != null) {
             for (Artista artista : album.getArtistas()) {
                 artista.getAlbuns().remove(album);
