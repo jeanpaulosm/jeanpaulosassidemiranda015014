@@ -28,6 +28,9 @@ public class ArtistaResponse {
     @Schema(description = "Descricao do artista", example = "Cantor e compositor armeno-americano")
     private String descricao;
 
+    @Schema(description = "Quantidade de albuns")
+    private Integer quantidadeAlbuns;
+
     @Schema(description = "Data de criacao")
     private LocalDateTime createdAt;
 
@@ -43,6 +46,7 @@ public class ArtistaResponse {
         response.setNome(artista.getNome());
         response.setTipo(artista.getTipo());
         response.setDescricao(artista.getDescricao());
+        response.setQuantidadeAlbuns(artista.getAlbuns() != null ? artista.getAlbuns().size() : 0);
         response.setCreatedAt(artista.getCreatedAt());
         response.setUpdatedAt(artista.getUpdatedAt());
         return response;
@@ -85,6 +89,14 @@ public class ArtistaResponse {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public Integer getQuantidadeAlbuns() {
+        return quantidadeAlbuns;
+    }
+
+    public void setQuantidadeAlbuns(Integer quantidadeAlbuns) {
+        this.quantidadeAlbuns = quantidadeAlbuns;
     }
 
     public LocalDateTime getCreatedAt() {

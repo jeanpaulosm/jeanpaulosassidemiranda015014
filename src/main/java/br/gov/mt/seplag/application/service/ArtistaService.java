@@ -44,15 +44,13 @@ public class ArtistaService {
     }
 
     /**
-     * Busca artista por ID com detalhes.
+     * Busca artista por ID com detalhes e albuns.
      */
     public ArtistaDetailResponse buscarPorId(Long id) {
         LOG.debugf("Buscando artista por ID: %d", id);
 
-        Artista artista = artistaRepository.findById(id);
-        if (artista == null) {
-            throw new ResourceNotFoundException("Artista", id);
-        }
+        Artista artista = artistaRepository.findByIdWithAlbuns(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Artista", id));
 
         return ArtistaDetailResponse.fromEntity(artista);
     }
@@ -123,14 +121,21 @@ public class ArtistaService {
 
     /**
      * Remove um artista pelo ID.
+     * Verifica se o artista possui albuns associados antes de remover.
      */
     @Transactional
     public void remover(Long id) {
         LOG.infof("Removendo artista ID: %d", id);
 
-        Artista artista = artistaRepository.findById(id);
-        if (artista == null) {
-            throw new ResourceNotFoundException("Artista", id);
+        Artista artista = artistaRepository.findByIdWithAlbuns(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Artista", id));
+
+        // Verifica se o artista possui albuns associados
+        if (artista.getAlbuns() != null && !artista.getAlbuns().isEmpty()) {
+            throw new BusinessException(
+                "Nao e possivel remover o artista pois possui " + artista.getAlbuns().size() +
+                " album(ns) associado(s). Remova os albuns primeiro ou desvincule o artista dos albuns."
+            );
         }
 
         artistaRepository.delete(artista);

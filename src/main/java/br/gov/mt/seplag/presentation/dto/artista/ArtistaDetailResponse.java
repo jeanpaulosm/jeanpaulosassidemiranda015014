@@ -2,17 +2,19 @@ package br.gov.mt.seplag.presentation.dto.artista;
 
 import br.gov.mt.seplag.domain.model.Artista;
 import br.gov.mt.seplag.domain.model.TipoArtista;
+import br.gov.mt.seplag.presentation.dto.album.AlbumSimpleResponse;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * DTO para resposta detalhada de artista.
- * Por enquanto nao inclui albuns - sera adicionado quando implementar o CRUD de albuns.
+ * DTO para resposta detalhada de artista com albuns.
  *
  * @author Jean Paulo Sassi de Miranda
  */
-@Schema(description = "Dados detalhados do artista")
+@Schema(description = "Dados detalhados do artista com albuns")
 public class ArtistaDetailResponse {
 
     @Schema(description = "ID do artista", example = "1")
@@ -26,6 +28,9 @@ public class ArtistaDetailResponse {
 
     @Schema(description = "Descricao do artista")
     private String descricao;
+
+    @Schema(description = "Lista de albuns do artista")
+    private List<AlbumSimpleResponse> albuns;
 
     @Schema(description = "Data de criacao")
     private LocalDateTime createdAt;
@@ -44,6 +49,13 @@ public class ArtistaDetailResponse {
         response.setDescricao(artista.getDescricao());
         response.setCreatedAt(artista.getCreatedAt());
         response.setUpdatedAt(artista.getUpdatedAt());
+
+        if (artista.getAlbuns() != null) {
+            response.setAlbuns(artista.getAlbuns().stream()
+                .map(AlbumSimpleResponse::fromEntity)
+                .collect(Collectors.toList()));
+        }
+
         return response;
     }
 
@@ -78,6 +90,14 @@ public class ArtistaDetailResponse {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public List<AlbumSimpleResponse> getAlbuns() {
+        return albuns;
+    }
+
+    public void setAlbuns(List<AlbumSimpleResponse> albuns) {
+        this.albuns = albuns;
     }
 
     public LocalDateTime getCreatedAt() {
