@@ -1,5 +1,6 @@
 package br.gov.mt.seplag.infrastructure.exception;
 
+import br.gov.mt.seplag.domain.exception.AuthenticationException;
 import br.gov.mt.seplag.domain.exception.BusinessException;
 import br.gov.mt.seplag.domain.exception.ResourceNotFoundException;
 import br.gov.mt.seplag.presentation.dto.common.ErrorResponse;
@@ -29,6 +30,10 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
 
         if (exception instanceof ResourceNotFoundException) {
             return buildResponse(Response.Status.NOT_FOUND, "Recurso nao encontrado", exception.getMessage());
+        }
+
+        if (exception instanceof AuthenticationException) {
+            return buildResponse(Response.Status.UNAUTHORIZED, "Autenticacao falhou", exception.getMessage());
         }
 
         if (exception instanceof BusinessException) {
