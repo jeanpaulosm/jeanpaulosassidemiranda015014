@@ -2,6 +2,7 @@ package br.gov.mt.seplag.infrastructure.exception;
 
 import br.gov.mt.seplag.domain.exception.AuthenticationException;
 import br.gov.mt.seplag.domain.exception.BusinessException;
+import br.gov.mt.seplag.domain.exception.RateLimitExceededException;
 import br.gov.mt.seplag.domain.exception.ResourceNotFoundException;
 import br.gov.mt.seplag.presentation.dto.common.ErrorResponse;
 import jakarta.validation.ConstraintViolation;
@@ -9,6 +10,8 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+import org.eclipse.microprofile.faulttolerance.exceptions.CircuitBreakerOpenException;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.logging.Logger;
 
 import java.util.stream.Collectors;
@@ -36,6 +39,10 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
             return buildResponse(Response.Status.UNAUTHORIZED, "Autenticacao falhou", exception.getMessage());
         }
 
+        if (exception instanceof RateLimitExceededException) {
+            return buildResponse(Response.Status.TOO_MANY_REQUESTS, "Limite de requisicoes excedido", exception.getMessage());
+        }
+
         if (exception instanceof BusinessException) {
             return buildResponse(Response.Status.BAD_REQUEST, "Erro de negocio", exception.getMessage());
         }
@@ -54,6 +61,36 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
 
         if (exception instanceof jakarta.ws.rs.ForbiddenException) {
             return buildResponse(Response.Status.FORBIDDEN, "Acesso negado", "Permissao insuficiente para acessar este recurso");
+        }
+
+        // Circuit Breaker exceptions (Fault Tolerance)
+        if (exception instanceof CircuitBreakerOpenException) {
+            LOG.warn("Circuit breaker aberto - servico externo indisponivel");
+            return buildResponse(
+                Response.Status.SERVICE_UNAVAILABLE,
+                "Servico temporariamente indisponivel",
+                "O servico externo esta temporariamente indisponivel. Tente novamente em alguns segundos."
+            );
+        }
+
+        if (exception instanceof TimeoutException) {
+            LOG.warn("Timeout na chamada ao servico externo");
+            return buildResponse(
+                Response.Status.GATEWAY_TIMEOUT,
+                "Timeout",
+                "O servico externo nao respondeu dentro do tempo limite. Tente novamente."
+            );
+        }
+
+        // Excecoes de conexao com servicos externos
+        if (exception instanceof java.net.ConnectException ||
+            exception.getCause() instanceof java.net.ConnectException) {
+            LOG.error("Falha de conexao com servico externo", exception);
+            return buildResponse(
+                Response.Status.SERVICE_UNAVAILABLE,
+                "Erro de conexao",
+                "Nao foi possivel conectar ao servico externo. Verifique sua conexao."
+            );
         }
 
         // Excecao generica - nao expoe detalhes internos em producao
