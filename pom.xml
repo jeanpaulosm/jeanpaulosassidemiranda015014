@@ -97,6 +97,18 @@
             <version>0.4</version>
         </dependency>
 
+        <!-- REST Client para API externa -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-jackson</artifactId>
+        </dependency>
+
+        <!-- Fault Tolerance (Circuit Breaker, Retry, Timeout) -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
+        </dependency>
+
         <!-- S3/MinIO -->
         <dependency>
             <groupId>io.quarkiverse.amazonservices</groupId>
